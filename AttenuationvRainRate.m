@@ -1,7 +1,7 @@
 clear all
 % radar frequency (Hz);
-freq = linspace(0e9, 100e9, 10000);
-c = 3e8;
+freq = linspace(0.1, 100e9, 10000);
+c = 3e11;
 % radar wavelength (mm);
 lambda = c./freq;
 % temperature of water in celsius
@@ -60,19 +60,9 @@ sig_s = zeros(nl, nd);
 sig_an = zeros(nl, nd);
 sig_sn = zeros(nl, nd);
 sig_ed = zeros(nl, nd);
-att1 = zeros(nl, 1);
-att2 = zeros(nl, 1);
-att3 = zeros(nl, 1);
-att4 = zeros(nl, 1);
-att5 = zeros(nl, 1);
-att6 = zeros(nl, 1);
+att = zeros(nl, 6);
 Nd = zeros(nl, nd);
-trans1 = zeros(nl, 1);
-trans2 = zeros(nl, 1);
-trans3 = zeros(nl, 1);
-trans4 = zeros(nl, 1);
-trans5 = zeros(nl, 1);
-trans6 = zeros(nl, 1);
+trans = zeros(nl, 6);
 
 %Ask user which temperature index they want to use
 fprintf(1, 'Possible temperature values\n')
@@ -97,109 +87,38 @@ end
 
    R = [5, 10, 15, 20, 25, 30];
    
+   for i = 1 : 6
     for lambi = 1 : nl
         for D_n_ind = 1: nd
-            r = R(1);
+            r = R(i);
             D=lambda(lambi)*D_n(D_n_ind)/pi;
-            sig_a = pi^2*D^3/lambda(lambi)*ImKm_w(lambi, ti); % calculates absorption cross section
-            sig_s = 2*pi^5*D^6/3/lambda(lambi)^4*Km2_w(lambi, ti); % calculates scattering cross section
-            sig_an = 4*sig_a/(pi*D^2); % calculates normalized absorption cross section
-            sig_sn = 4*sig_s/(pi*D^2); % calculates normalized scattering cross section
+            a = D/2;
+            k = (2 * pi)/(lambda(lambi));
+            x = k * a;
+            m = m_w(lambi, ti);
+            result = Mie(m, x);
+            E = result(:, 4) .* (pi*(a^2));
+            sig_e = sum(E);
             Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
-            sig_ed = sig_an + sig_sn; % calculates normalized extinction cross section
-            att1(lambi) = att1(lambi) + (4.34e3 * Nd * sig_ed * deltaD); % calculates attenuation
-            trans1(lambi) = 1 - att1(lambi); % calculates transmission
+            att(lambi, i) = att(lambi, i) + (4.34e3 * Nd * sig_e * deltaD); % calculates attenuation
+            trans(lambi, i) = 1 - att(lambi, i); % calculates transmission
         end
     end
-    
-  for lambi = 1 : nl
-        for D_n_ind = 1: nd
-            r = R(2);
-            D=lambda(lambi)*D_n(D_n_ind)/pi;
-            sig_a = pi^2*D^3/lambda(lambi)*ImKm_w(lambi, ti); % calculates absorption cross section
-            sig_s = 2*pi^5*D^6/3/lambda(lambi)^4*Km2_w(lambi, ti); % calculates scattering cross section
-            sig_an = 4*sig_a/(pi*D^2); % calculates normalized absorption cross section
-            sig_sn = 4*sig_s/(pi*D^2); % calculates normalized scattering cross section
-            Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
-            sig_ed = sig_an + sig_sn; % calculates normalized extinction cross section
-            att2(lambi) = att2(lambi) + (4.34e3 * Nd * sig_ed * deltaD); % calculates attenuation
-            trans2(lambi) = 1 - att2(lambi); % calculates transmission
-        end
-  end
-    
-  for lambi = 1 : nl
-        for D_n_ind = 1: nd
-            r = R(3);
-            D=lambda(lambi)*D_n(D_n_ind)/pi;
-            sig_a = pi^2*D^3/lambda(lambi)*ImKm_w(lambi, ti); % calculates absorption cross section
-            sig_s = 2*pi^5*D^6/3/lambda(lambi)^4*Km2_w(lambi, ti); % calculates scattering cross section
-            sig_an = 4*sig_a/(pi*D^2); % calculates normalized absorption cross section
-            sig_sn = 4*sig_s/(pi*D^2); % calculates normalized scattering cross section
-            Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
-            sig_ed = sig_an + sig_sn; % calculates normalized extinction cross section
-            att3(lambi) = att3(lambi) + (4.34e3 * Nd * sig_ed * deltaD); % calculates attenuation
-            trans3(lambi) = 1 - att3(lambi); % calculates transmission
-        end
-  end
-    
-  for lambi = 1 : nl
-        for D_n_ind = 1: nd
-            r = R(4);
-            D=lambda(lambi)*D_n(D_n_ind)/pi;
-            sig_a = pi^2*D^3/lambda(lambi)*ImKm_w(lambi, ti); % calculates absorption cross section
-            sig_s = 2*pi^5*D^6/3/lambda(lambi)^4*Km2_w(lambi, ti); % calculates scattering cross section
-            sig_an = 4*sig_a/(pi*D^2); % calculates normalized absorption cross section
-            sig_sn = 4*sig_s/(pi*D^2); % calculates normalized scattering cross section
-            Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
-            sig_ed = sig_an + sig_sn; % calculates normalized extinction cross section
-            att4(lambi) = att4(lambi) + (4.34e3 * Nd * sig_ed * deltaD); % calculates attenuation
-            trans4(lambi) = 1 - att4(lambi); % calculates transmission
-        end
-  end
-    
-  for lambi = 1 : nl
-        for D_n_ind = 1: nd
-            r = R(5);
-            D=lambda(lambi)*D_n(D_n_ind)/pi;
-            sig_a = pi^2*D^3/lambda(lambi)*ImKm_w(lambi, ti); % calculates absorption cross section
-            sig_s = 2*pi^5*D^6/3/lambda(lambi)^4*Km2_w(lambi, ti); % calculates scattering cross section
-            sig_an = 4*sig_a/(pi*D^2); % calculates normalized absorption cross section
-            sig_sn = 4*sig_s/(pi*D^2); % calculates normalized scattering cross section
-            Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
-            sig_ed = sig_an + sig_sn; % calculates normalized extinction cross section
-            att5(lambi) = att5(lambi) + (4.34e3 * Nd * sig_ed * deltaD); % calculates attenuation
-            trans5(lambi) = 1 - att5(lambi); % calculates transmission
-        end
-  end
-    
-  for lambi = 1 : nl
-        for D_n_ind = 1: nd
-            r = R(6);
-            D=lambda(lambi)*D_n(D_n_ind)/pi;
-            sig_a = pi^2*D^3/lambda(lambi)*ImKm_w(lambi, ti); % calculates absorption cross section
-            sig_s = 2*pi^5*D^6/3/lambda(lambi)^4*Km2_w(lambi, ti); % calculates scattering cross section
-            sig_an = 4*sig_a/(pi*D^2); % calculates normalized absorption cross section
-            sig_sn = 4*sig_s/(pi*D^2); % calculates normalized scattering cross section
-            Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
-            sig_ed = sig_an + sig_sn; % calculates normalized extinction cross section
-            att6(lambi) = att6(lambi) + (4.34e3 * Nd * sig_ed * deltaD); % calculates attenuation
-            trans6(lambi) = 1 - att6(lambi); % calculates transmission
-        end
-    end
-     
-
+   end
     
 % Print Attenuation Graph
 fntsz = 14;
 figure(1)
 clf
-plot (freq/1e9, att1, 'b')
+ylim ([2 10])
+plot (freq/1e9, att(:, 1), 'b')
 hold on
-plot (freq/1e9, att2, 'r')
-plot (freq/1e9, att3, 'k')
-plot (freq/1e9, att4, 'g')
-plot (freq/1e9, att5, 'r--')
-plot (freq/1e9, att6, 'b--')
+ylim ([2 10])
+plot (freq/1e9, att(:, 2), 'r')
+plot (freq/1e9, att(:, 3), 'k')
+plot (freq/1e9, att(:, 4), 'g')
+plot (freq/1e9, att(:, 5), 'r--')
+plot (freq/1e9, att(:, 6), 'b--')
 set(gca, 'fontsize', fntsz)
 xlabel('Frequency (GHz)')
 ylabel('Attenuation (dB / Km)')
@@ -210,13 +129,17 @@ hold off
 fntsz = 14;
 figure(2)
 clf
-plot (freq, trans1, 'b')
-plot (freq, trans2, 'r')
-plot (freq, trans3, 'k')
-plot (freq, trans4, 'g')
-plot (freq, trans5, 'r--')
-plot (freq, trans6, 'b--')
+ylim ([-10 -2])
+plot (freq./1e9, trans(:, 1), 'b')
+hold on
+ylim ([-10 -2])
+plot (freq/1e9, trans(:, 2), 'r')
+plot (freq/1e9, trans(:, 3), 'k')
+plot (freq/1e9, trans(:, 4), 'g')
+plot (freq/1e9, trans(:, 5), 'r--')
+plot (freq/1e9, trans(:, 6), 'b--')
 set(gca, 'fontsize', fntsz)
-xlabel('Frequency (Hz)')
+xlabel('Frequency (GHz)')
 ylabel ('Transmission (dB / Km)')
 title(ptit)
+hold off
