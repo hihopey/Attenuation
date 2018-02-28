@@ -1,7 +1,7 @@
 clear all
 % radar frequency (Hz);
-freq = linspace(0.1, 100e9, 10000);
-c = 3e11;
+freq = linspace(0.1, 200e9, 1000);
+c = 3e11; %speed of light in mm
 % radar wavelength (mm);
 lambda = c./freq;
 % temperature of water in celsius
@@ -99,7 +99,7 @@ end
             result = Mie(m, x);
             E = result(:, 4) .* (pi*(a^2));
             sig_e = sum(E);
-            Nd = (0.08^-1)*exp(-41*r^(-0.21)*D); 
+            Nd = (0.08)*exp(-41*r^(-0.21)*D); 
             att(lambi, i) = att(lambi, i) + (4.34e3 * Nd * sig_e * deltaD); % calculates attenuation
             trans(lambi, i) = 1 - att(lambi, i); % calculates transmission
         end
@@ -110,15 +110,14 @@ end
 fntsz = 14;
 figure(1)
 clf
-ylim ([2 10])
 plot (freq/1e9, att(:, 1), 'b', 'DisplayName', '5mm')
 hold on
-ylim ([2 10])
 plot (freq/1e9, att(:, 2), 'r', 'DisplayName', '10mm')
 plot (freq/1e9, att(:, 3), 'k', 'DisplayName', '15mm')
 plot (freq/1e9, att(:, 4), 'g', 'DisplayName', '20mm')
 plot (freq/1e9, att(:, 5), 'r--', 'DisplayName', '25mm')
 plot (freq/1e9, att(:, 6), 'b--', 'DisplayName', '30mm')
+ylim ([2 10])
 lgd = legend('location', 'northwest', 'orientation', 'vertical')
 title(lgd, 'Rain Rate')
 set(gca, 'fontsize', fntsz)
@@ -128,18 +127,16 @@ title(ptit)
 hold off
   
 % Print Transmission Graph
-fntsz = 14;
 figure(2)
 clf
-ylim ([-10 -2])
 plot (freq./1e9, trans(:, 1), 'b', 'DisplayName', '5mm')
 hold on
-ylim ([-10 -2])
 plot (freq/1e9, trans(:, 2), 'r', 'DisplayName', '10mm')
 plot (freq/1e9, trans(:, 3), 'k', 'DisplayName', '15mm')
 plot (freq/1e9, trans(:, 4), 'g', 'DisplayName', '20mm')
 plot (freq/1e9, trans(:, 5), 'r--', 'DisplayName', '25mm')
 plot (freq/1e9, trans(:, 6), 'b--', 'DisplayName', '30mm')
+ylim ([-10 -2])
 lgd = legend('location', 'southwest', 'orientation', 'vertical')
 title(lgd, 'Rain Rate')
 set(gca, 'fontsize', fntsz)
